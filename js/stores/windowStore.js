@@ -401,13 +401,6 @@ const doAction = (action) => {
       windowState = windowState.setIn(['frames', frameStateUtil.getFramePropsIndex(windowState.get('frames'), action.frameProps), 'hoverState'], action.hoverState)
       windowState = windowState.setIn(['tabs', frameStateUtil.getFramePropsIndex(windowState.get('frames'), action.frameProps), 'hoverState'], action.hoverState)
       break
-    case windowConstants.WINDOW_SET_IS_BEING_DRAGGED_OVER_DETAIL:
-      if (!action.dragOverKey) {
-        windowState = windowState.deleteIn(['ui', 'dragging'])
-      } else {
-        windowState = windowState.mergeIn(['ui', 'dragging', 'draggingOver'], Immutable.fromJS(Object.assign({}, action.dragDetail, { dragOverKey: action.dragOverKey, dragType: action.dragType })))
-      }
-      break
     case windowConstants.WINDOW_TAB_MOVE:
       const sourceFramePropsIndex = frameStateUtil.getFramePropsIndex(windowState.get('frames'), action.sourceFrameProps)
       let newIndex = frameStateUtil.getFramePropsIndex(windowState.get('frames'), action.destinationFrameProps) + (action.prepend ? 0 : 1)

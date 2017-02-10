@@ -26,7 +26,7 @@ const {isFrameError} = require('../../app/common/lib/httpUtil')
 const locale = require('../l10n')
 const appConfig = require('../constants/appConfig')
 const {getSiteSettingsForHostPattern} = require('../state/siteSettings')
-const {currentWindowWebContents, isFocused} = require('../../app/renderer/currentWindow')
+const {currentWindowId, currentWindowWebContents, isFocused} = require('../../app/renderer/currentWindow')
 const windowStore = require('../stores/windowStore')
 const appStoreRenderer = require('../stores/appStoreRenderer')
 const siteSettings = require('../state/siteSettings')
@@ -312,6 +312,18 @@ class Frame extends ImmutableComponent {
     if (this.shouldCreateWebview()) {
       guestInstanceId = this.props.guestInstanceId
       this.webview = document.createElement('webview')
+
+      this.addEventListeners()
+      if (cb) {
+        this.runOnDomReady = cb
+        let eventCallback = (e) => {
+          this.webview.removeEventListener(e.type, eventCallback)
+          this.runOnDomReady()
+          delete this.runOnDomReady
+        }
+        this.webview.addEventListener('did-attach', eventCallback)
+      }
+
       if (guestInstanceId) {
         if (!this.webview.attachGuest(guestInstanceId)) {
           console.error('could not set guestInstanceId ' + guestInstanceId)
@@ -325,23 +337,11 @@ class Frame extends ImmutableComponent {
         this.webview.setAttribute('partition', frameStateUtil.getPartition(this.frame))
       }
 
-      this.addEventListeners()
-      if (cb) {
-        this.runOnDomReady = cb
-        let eventCallback = (e) => {
-          this.webview.removeEventListener(e.type, eventCallback)
-          this.runOnDomReady()
-          delete this.runOnDomReady
-        }
-        this.webview.addEventListener('did-attach', eventCallback)
-      }
-
       webviewAdded = true
     }
 
     if (!this.props.guestInstanceId) {
-      console.log('NO GUEST INSTANCE ID, SETTING SRC')
-      // this.webview.setAttribute('src', newSrc)
+      this.webview.setAttribute('src', newSrc)
     }
 
     this.webview.setAttribute('data-frame-key', this.props.frameKey)
@@ -564,10 +564,27 @@ class Frame extends ImmutableComponent {
         this.onFindAgain(false)
         break
       case 'detach':
-        console.log('------deatch1')
+        console.log('------deatch1', this.props.activeShortcutDetails && this.props.activeShortcutDetails.toJS())
         this.webview.detachGuest()
         console.log('------deatch2')
-        appActions.newWindow(frameStateUtil.frameOptsFromFrame(this.frame).toJS())
+        const frameOpts = frameStateUtil.frameOptsFromFrame(this.frame).toJS()
+
+        if (this.props.activeShortcutDetails) {
+          const dropWindowId = this.props.activeShortcutDetails.get('dropWindowId') || this.props.activeShortcutDetails.getIn(['dragOverData', 'draggingOverWindowId'])
+          console.log('detaching from this window:', currentWindowId)
+          console.log('drop on window id:', dropWindowId)
+          if (currentWindowId !== dropWindowId) {
+            console.log('adding new webcontents with dropWindow:', dropWindowId, 'frameOpts:', frameOpts)
+            appActions.newWebContentsAdded(dropWindowId, frameOpts)
+          } else {
+            console.log('new window with frameOpts: ', frameOpts)
+            appActions.newWindow(frameOpts)
+          }
+        } else {
+          console.log('new window2 with frameOpts: ', frameOpts)
+          appActions.newWindow(frameOpts)
+        }
+
         this.props.onCloseFrame(this.frame)
         break
     }
@@ -694,12 +711,17 @@ class Frame extends ImmutableComponent {
       currentWindowWebContents.send(messages.DISABLE_SWIPE_GESTURE)
     })
     this.webview.addEventListener('did-attach', (e) => {
+      console.log('----did-attach-1')
       if (this.frame.isEmpty()) {
+        console.log('----did-attach-2')
         return
       }
+      console.log('----did-attach-3')
       // TODO: Remove webview.getId() part below when everyone is on a newer electron
       let tabId = e.tabId !== undefined ? e.tabId : this.webview.getId()
+      console.log('----did-attach-4', tabId, this.props.tabId)
       if (this.props.tabId !== tabId) {
+        console.log('----did-attach-5', this.frame, tabId)
         windowActions.setFrameTabId(this.frame, tabId)
       }
     })

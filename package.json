@@ -47,7 +47,8 @@
     "win-fixnpm": "powershell ./tools/windows/vs2015-sp3-fix-npm.ps1",
     "win-renpm": "powershell ./tools/windows/re-npm.ps1",
     "snyk-protect": "snyk protect",
-    "prepublish": "npm run snyk-protect"
+    "prepublish": "npm run snyk-protect",
+    "prepare": "npm run snyk-protect"
   },
   "repository": "brave/browser-laptop",
   "author": {
@@ -121,7 +122,7 @@
     "underscore": "1.8.3",
     "url-loader": "^0.6.0",
     "webtorrent-remote": "^1.0.0",
-    "snyk": "^1.69.9"
+    "snyk": "^1.85.0"
   },
   "devDependencies": {
     "asar": "^0.11.0",

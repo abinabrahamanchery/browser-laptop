@@ -1,5 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.10.1
+version: v1.13.3
 ignore: {}
 # patches apply the minimum changes required to fix a vulnerability
 patch:
@@ -14,3 +14,8 @@ patch:
   'npm:moment:20170905':
     - ledger-client > bitgo > moment:
         patched: '2018-02-24T00:03:04.099Z'
+  'npm:mime:20170907':
+    - ledger-client > bitgo > express > send > mime:
+        patched: '2019-05-09T23:54:54.628Z'
+    - ledger-client > bitgo > express > serve-static > send > mime:
+        patched: '2019-05-09T23:54:54.628Z'

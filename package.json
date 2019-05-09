@@ -121,7 +121,7 @@
     "underscore": "1.8.3",
     "url-loader": "^0.6.0",
     "webtorrent-remote": "^1.0.0",
-    "snyk": "^1.69.9"
+    "snyk": "^1.163.1"
   },
   "devDependencies": {
     "asar": "^0.11.0",

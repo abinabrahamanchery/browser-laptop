@@ -102,7 +102,7 @@
     "ledger-publisher": "^0.8.108",
     "lru-cache": "^1.0.0",
     "moment": "^2.15.1",
-    "normalize-url": "^1.7.0",
+    "normalize-url": "^4.5.1",
     "parse-torrent": "^5.8.1",
     "prettier-bytes": "^1.0.3",
     "punycode": "^2.0.0",
